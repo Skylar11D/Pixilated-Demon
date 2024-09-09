@@ -38,9 +38,9 @@ public class Main {
         MinecraftServer server = MinecraftServer.init();
         instanceContainer = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.OVERWORLD);
         ChunkDepthGenerator customChunkGenerator = new ChunkDepthGenerator();
-        NoisedTerrainGenerator noisedTerrainGenerator = new NoisedTerrainGenerator();
+        //NoisedTerrainGenerator noisedTerrainGenerator = new NoisedTerrainGenerator();
         //instanceContainer.setGenerator(Main::basicTerrainsGenerator);
-        instanceContainer.setGenerator(noisedTerrainGenerator::generate);
+        instanceContainer.setGenerator(customChunkGenerator::generate);
         instanceContainer.setChunkSupplier(LightingChunk::new);
 
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();

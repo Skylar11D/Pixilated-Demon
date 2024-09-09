@@ -1,55 +1,67 @@
 package xyz.sk1.minecraft.pxdemo.world.terrarin;
 
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
 import net.minestom.server.instance.generator.Generator;
-import org.jetbrains.annotations.NotNull;
 import xyz.sk1.minecraft.pxdemo.world.terrarin.noises.NoiseGenerator;
+import xyz.sk1.minecraft.pxdemo.world.terrarin.noises.OpenSimplex2S;
+
+import java.util.Random;
 
 public class NoisedTerrainGenerator implements Generator {
 
-    NoiseGenerator perlinNoiseGenerator;
+    private final NoiseGenerator noiseGenerator;
+    private final OpenSimplex2S openSimplex2S;
+    private final int width;
+    private final int height;
+    private final int maxTerrainHeight;
+    private final Random random;
 
-    public NoisedTerrainGenerator(){
-        this.perlinNoiseGenerator = new NoiseGenerator(12345L);
+    public NoisedTerrainGenerator() {
+        this.openSimplex2S = new OpenSimplex2S();
+        this.noiseGenerator = new NoiseGenerator(new Random().nextInt());
+        this.width = 16;
+        this.height = 16;
+        this.maxTerrainHeight = 64;
+        this.random = new Random();
     }
 
-    @Override
-    public void generate(@NotNull GenerationUnit unit) {
+    public void generate(GenerationUnit unit) {
+        int chunkX = unit.absoluteStart().chunkX();
+        int chunkZ = unit.absoluteEnd().chunkZ();
 
-        // Get the start and end coordinates of the generation area
-        Point start = unit.absoluteStart();
-        Point end = unit.absoluteEnd();
+        for (int x = 0; x < width; x++) {
+            for (int z = 0; z < height; z++) {
+                int blockX = chunkX * 16 + x;
+                int blockZ = chunkZ * 16 + z;
 
-        int startX = (int) start.x();
-        int startY = (int) start.y();
-        int startZ = (int) start.z();
-        int endX = (int) end.x();
-        int endY = (int) end.y();
-        int endZ = (int) end.z();
+                // Generate noise value
+                double noiseValue = openSimplex2S.noise2(14, blockX / 16.0, blockZ / 16.0);
 
-        // Noise parameters for smooth terrain generation
-        double frequency = 0.01; // Frequency of the noise function
-        double amplitude = 20;   // Amplitude of the noise function
+                // Normalize and scale the noise
+                noiseValue = (noiseValue + 1) / 2; // Normalize to 0-1
+                noiseValue *= maxTerrainHeight;
 
-        for (int x = startX; x < endX; x++) {
-            for (int z = startZ; z < endZ; z++) {
-                // Generate height using OpenSimplex noise
-                int height = this.perlinNoiseGenerator.getHeightAt(x, z);
-
-                // Set blocks up to the generated height
-                for (int y = startY; y <= height; y++) {
-                    unit.modifier().setBlock(x - startX, y, z - startZ, Block.STONE);
-                }
-
-                // Optionally, add a layer of grass on top
-                if (height >= startY) {
-                    unit.modifier().setBlock(x - startX, height, z - startZ, Block.GRASS_BLOCK);
+                // Place blocks based on noise value
+                int blockY = (int) noiseValue;
+                for (int y = 0; y < blockY; y++) {
+                    unit.modifier().setBlock(new Pos(blockX, y, blockZ), Block.STONE);
                 }
             }
         }
+    }
 
+    public void fillChunk(Chunk chunk) {
+        // Optional: Fill the chunk with a default block (e.g., air)
+        for (int x = 0; x < 16; x++) {
+            for (int y = 0; y < 256; y++) {
+                for (int z = 0; z < 16; z++) {
+                    chunk.setBlock(new Pos(chunk.getChunkX() * 16 + x, y, chunk.getChunkZ() * 16 + z), Block.AIR);
+                }
+            }
+        }
     }
 
 
