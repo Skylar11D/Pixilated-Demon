@@ -54,7 +54,6 @@ public class NoisedTerrainGenerator implements Generator {
     }
 
     public void fillChunk(Chunk chunk) {
-        // Optional: Fill the chunk with a default block (e.g., air)
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
