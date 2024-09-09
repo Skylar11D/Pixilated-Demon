@@ -40,8 +40,8 @@ public class Main {
         ChunkDepthGenerator customChunkGenerator = new ChunkDepthGenerator();
         //NoisedTerrainGenerator noisedTerrainGenerator = new NoisedTerrainGenerator();
         //instanceContainer.setGenerator(Main::basicTerrainsGenerator);
-        instanceContainer.setGenerator(customChunkGenerator::generate);
-        instanceContainer.setChunkSupplier(LightingChunk::new);
+        instanceContainer.setGenerator(customChunkGenerator::generate); //terrains generation starts from here
+        instanceContainer.setChunkSupplier(LightingChunk::new); //provides light
 
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
@@ -53,7 +53,7 @@ public class Main {
             globalEventHandler.addListener(((Class) entry.getKey()), ((Consumer) entry.getValue()));
         }
 
-        MojangAuth.init();
+        MojangAuth.init(); //making it only for mojang authenticated players (not-cracked)
         server.start("127.0.0.1", 11666);
 
     }
